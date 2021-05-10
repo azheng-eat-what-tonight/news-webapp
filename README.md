@@ -11,7 +11,7 @@
 ##### 初始目录结构
 
 > .
-> ├── node_modules 第三方包存储目录
+> 1.  ├── node_modules 第三方包存储目录
 > ├── public 任何放置在 public 文件夹的静态资源都会被简单的复制，而不经过 webpack。
 > │ ├── favicon.ico 浏览器收藏夹图标
 > │ └── index.html 单页面 HTML 文件
