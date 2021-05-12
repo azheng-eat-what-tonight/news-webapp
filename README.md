@@ -11,26 +11,27 @@
 ##### 初始目录结构
 
 > .
+>
 > 1.  ├── node_modules 第三方包存储目录
-> ├── public 任何放置在 public 文件夹的静态资源都会被简单的复制，而不经过 webpack。
-> │ ├── favicon.ico 浏览器收藏夹图标
-> │ └── index.html 单页面 HTML 文件
-> ├── src
-> │ ├── assets 公共资源目录，放图片等资源
-> │ ├── components 公共组件目录
-> │ ├── router Vue Router 路由模块
-> │ ├── store Vue 容器模块
-> │ ├── views 视图组件存储目录，所有的路由页面都存储到这里
-> │ ├── App.vue 根组件，最终被替换渲染到 index.html 页面中 #app 入口节点
-> │ └── main.js 整个项目的启动入口模块
-> ├── .browserslistrc 指定了项目的目标浏览器的范围。这个值会被 @babel/preset-env 和 Autoprefixer 用来确定需要转译的 JavaScript 特性和需要添加的 CSS 浏览器前缀
-> ├── .editorconfig EditorConfig 帮助开发人员定义和维护跨编辑器（或 IDE）的统一的代码风格。
-> ├── .eslintrc.js ESLint 的配置文件
-> ├── .gitignore Git 的忽略配置文件，告诉 Git 项目中要忽略的文件或文件夹
-> ├── README.md 说明文档
-> ├── babel.config.js Babel 的配置文件
-> ├── package-lock.json 记录安装时的包的版本号，以保证自己或其他人在 npm install 时大家的依赖能保证一致
-> └── package.json 包说明文件，记录了项目中使用到的第三方包依赖信息等内容
+>     ├── public 任何放置在 public 文件夹的静态资源都会被简单的复制，而不经过 webpack。
+>     │ ├── favicon.ico 浏览器收藏夹图标
+>     │ └── index.html 单页面 HTML 文件
+>     ├── src
+>     │ ├── assets 公共资源目录，放图片等资源
+>     │ ├── components 公共组件目录
+>     │ ├── router Vue Router 路由模块
+>     │ ├── store Vue 容器模块
+>     │ ├── views 视图组件存储目录，所有的路由页面都存储到这里
+>     │ ├── App.vue 根组件，最终被替换渲染到 index.html 页面中 #app 入口节点
+>     │ └── main.js 整个项目的启动入口模块
+>     ├── .browserslistrc 指定了项目的目标浏览器的范围。这个值会被 @babel/preset-env 和 Autoprefixer 用来确定需要转译的 JavaScript 特性和需要添加的 CSS 浏览器前缀
+>     ├── .editorconfig EditorConfig 帮助开发人员定义和维护跨编辑器（或 IDE）的统一的代码风格。
+>     ├── .eslintrc.js ESLint 的配置文件
+>     ├── .gitignore Git 的忽略配置文件，告诉 Git 项目中要忽略的文件或文件夹
+>     ├── README.md 说明文档
+>     ├── babel.config.js Babel 的配置文件
+>     ├── package-lock.json 记录安装时的包的版本号，以保证自己或其他人在 npm install 时大家的依赖能保证一致
+>     └── package.json 包说明文件，记录了项目中使用到的第三方包依赖信息等内容
 
 ### Project Begin 2021.5.10 0.54
 
@@ -140,3 +141,78 @@
 > ```
 > end
 > ```
+
+---
+
+### Project Login SET 2021.5.12 23.00
+
+##### 对登录模块进行功能大概进行实现
+
+- 1. 用户界面的样式布局
+
+- 2. 对 user { name , password } 进行双向的数据绑定
+- 3. 写 axios 请求（登录为 post）,这里除了使用了案例中的请求外，尝试了与同学后端的一次简单对接，解决了跨域问题。
+- 4. 为了得到更好的交互效果使用了 vant 库中的轻提示组件（Toast），示例代码如下：
+- - ```javascript
+    this.$toast.loading({
+      duration: 10000, // 持续时间，0表示持续展示不停止
+      forbidClick: true, // 是否禁止背景点击
+      message: "登录中...", // 提示消息
+    });
+    ```
+- - ```
+
+    ```
+
+- 5. 插槽（slot）
+- 6. 阻止默认事件，@click.prevent()
+- 7. Token 本地存储（VUEX 容器持久化）并做了一个简单的封装（.vue ----> ）
+- - ```javascript
+                // .vue 将后端返回的用户登录状态（token等数据）放到 Vuex 容器中
+                this.$store.commit("setUser", data.data);
+
+                // .js 在store中配置
+                state: {
+                    user: getItem(USER_KEY) // 当前登录用户的状态
+                },
+                mutations: {
+                    setUser(state, data) {
+                        state.user = data;
+                        //放入本地存储中
+                        setItem(USER_KEY, state.user);
+                    }
+                }
+
+                // 在until/.js中
+                // 根据name读取数据
+            export const getItem = name => {
+                const data = window.localStorage.getItem(name)
+                    // 为什么把 JSON.parse 放到 try-catch 中？
+                    // 因为 data 可能不是 JSON 格式字符串
+                try {
+                    // 尝试把 data 转为 JavaScript 对象
+                    return JSON.parse(data)
+                } catch (err) {
+                    // data 不是 JSON 格式字符串，直接原样返回
+                    return data
+                }
+            }
+            // 设置 token
+            export const setItem = (name, value) => {
+                // 如果 value 是对象，就把 value 转为 JSON 格式字符串再存储
+                if (typeof value === 'object') {
+                    value = JSON.stringify(value)
+                }
+                window.localStorage.setItem(name, value)
+            }
+             // 移除 token
+            export const removeItem = name => {
+                window.localStorage.removeItem(name)
+            }
+    ```
+
+- 8. 关于 Token 其他知识在之后会学习
+
+     END
+
+---

@@ -3,3 +3,4 @@ config/*.js
 src/assets
 src/
 *.js
+src/views/login/*.vue
