@@ -86,9 +86,8 @@
 </template>
 
 <script>
-import { login } from "../../api/user";
-import { login1 } from "../../api/user1";
-
+import { login } from "../../api/user1";
+import { getNews } from "../../api/news";
 export default {
   name: "LoginIndex",
   components: {},
@@ -104,6 +103,8 @@ export default {
       passwordShowIcon: true,
       //密码类型
       pwdType: "password"
+
+      // 请求期间禁用按钮点击
     };
   },
   computed: {},
@@ -111,7 +112,7 @@ export default {
   created() {},
   mounted() {},
   methods: {
-    //切换都注册界面
+    // 切换到注册界面
     onToZhuce() {
       this.$toast.loading({
         duration: 10000, // 持续时间，0表示持续展示不停止
@@ -119,18 +120,19 @@ export default {
         message: "登录中..." // 提示消息
       });
     },
-    //显示密码
+
+    // 显示密码
     showPassword() {
       this.passwordShowIcon = !this.passwordShowIcon;
       this.pwdType = this.pwdType === "password" ? "text" : "password";
     },
 
-    //返回键
+    // 返回键
     onClickLeft() {
       this.$router.back();
     },
 
-    //表单中存在错误
+    // 表单中存在错误
     onFailed(error) {
       if (error.errors[0]) {
         this.$toast({
@@ -149,14 +151,21 @@ export default {
         message: "登录中..." // 提示消息
       });
       try {
+        // //getNews
+        // const { data } = await (await getNews(this.user)).data;
+        // this.$toast.success("获取成功");
+        // console.log(data);
         //发送登录请求
-        const { data } = await login1(this.user);
+        const { data } = await login(this.user);
         this.$toast.success("登录成功");
 
-        // 将后端返回的用户登录状态（token等数据）放到 Vuex 容器中
+        // 将后端返回的用户登录状态（ token 等数据）放到 Vuex 容器中
         this.$store.commit("setUser", data.data);
+
+        // 界面跳转 到我的界面
+        this.$router.push("/my");
       } catch (err) {
-        this.$toast.fail("登录失败，手机号或密码错误");
+        this.$toast.fail("登录失败，用户名或密码错误");
       }
     }
   }

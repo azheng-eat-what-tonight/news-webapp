@@ -216,3 +216,58 @@
      END
 
 ---
+
+### Project Home 2021.5.23 15.32
+
+主页的排版与功能上的一些实现
+滑动标签页、下拉刷徐、上滑加载、相对时间处理等
+
+> ###### vue 使用@路径引入
+>
+> > ```javascript
+> > configureWebpack: {
+> >        resolve: {
+> >         //配置路径别名
+> >         alias: {
+> >         'assets': '@/assets',
+> >         'common': '@/common',
+> >         'components': '@/components',
+> >         'network': '@/network',
+> >         'views': '@/views',
+> >         }
+> >        }
+> >    },
+> > ```
+> >
+> > ```
+> >
+> > ```
+
+> ###### 将后台传输过来的时间转换为相对时间 (day.js.org)
+>
+> 安装 npm i dayjs
+> 创建 js 文件 （@/utils/dayjs.js）
+> 引入 (import dayjs from 'dayjs')
+>
+> > ```javascript
+> > import Vue from 'vue'
+> > import dayjs from 'dayjs'
+> >
+> > // 加载中文语言包
+> > import 'dayjs/locale/zh-cn's
+> > import relativeTime from 'dayjs/plugin/relativeTime'
+> >
+> > // 配置使用处理相对时间的插件
+> > dayjs.extend(relativeTime)
+> >
+> > // 配置使用中文语言包
+> > dayjs.locale('zh-cn')
+> >
+> > // 全局过滤器：处理相对时间
+> > Vue.filter('relativeTime', value => {
+> >     return dayjs().from(dayjs(value))
+> > })
+> >
+> > ```
+>
+> 在 main.js 中引入( import './utils/dayjs' )

@@ -1,21 +1,21 @@
 <template>
-  <div class="viedo-container">视频</div>
+  <div class="viedo-container">平台</div>
 </template>
 
 <script>
 export default {
-  name: 'VideoIndex',
+  name: "VideoIndex",
   components: {},
   props: {},
-  data () {
-    return {}
+  data() {
+    return {};
   },
   computed: {},
   watch: {},
-  created () {},
-  mounted () {},
+  created() {},
+  mounted() {},
   methods: {}
-}
+};
 </script>
 
 <style scoped lang="less"></style>

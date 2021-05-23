@@ -4,7 +4,7 @@ import router from './router'
 import store from './store'
 import Vant from 'vant'
 import { Toast } from "vant";
-
+import './until/day'
 // 加载设置rem基准值
 import 'amfe-flexible'
 
