@@ -271,3 +271,59 @@
 > > ```
 >
 > 在 main.js 中引入( import './utils/dayjs' )
+
+##### 前端 vue 解析 token
+
+> 引入 jwt-decode 包
+>
+> ```
+> npm install jwt-decode --save
+> ```
+>
+> > 在 vue 中引入 jwt-decode
+>
+> ```javascript
+> import jwtDecode from "jwt-decode";
+> ```
+>
+> js
+>
+> ```javascript
+> const decode = jwtDecode(token);
+> ```
+
+---
+
+### Project All 2021.5.27 21.10
+
+完成了平台界面和展示平台界面新闻的功能
+
+下一步目标：
+
+> ##### 用户
+>
+> > 用户信息的获取（getCurrentUser）
+> > 用户资料编辑
+> > 用户收藏、浏览记录、订阅平台的展示
+>
+> ##### 首页
+>
+> > 推荐新闻
+> > 新闻类别的获取
+> > 不同新闻类别的展示
+>
+> ##### 搜索
+>
+> > 整个搜索功能的完成
+>
+> ##### 平台
+>
+> > 平台订阅与取消
+> > 平台新闻排名的完成
+> > 平台界面的下拉刷新与下拉加载
+>
+> ##### 热榜
+>
+> > 整个热榜界面的设计与制作
+
+---

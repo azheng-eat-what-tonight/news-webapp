@@ -7,8 +7,8 @@
     <!-- 底部导航栏 -->
     <van-tabbar v-model="active" route>
       <van-tabbar-item icon="home-o" to="/">首页</van-tabbar-item>
-      <van-tabbar-item icon="comment-o" to="/qa">热榜</van-tabbar-item>
-      <van-tabbar-item icon="video-o" to="/video">平台</van-tabbar-item>
+      <van-tabbar-item icon="comment-o" to="/rank">热榜</van-tabbar-item>
+      <van-tabbar-item icon="shop-o" to="/pla">平台</van-tabbar-item>
       <van-tabbar-item icon="manager-o" to="/my">我的</van-tabbar-item>
     </van-tabbar>
     <!-- /底部导航栏 -->

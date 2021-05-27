@@ -86,8 +86,10 @@
 </template>
 
 <script>
-import { login } from "../../api/user1";
+import { login } from "../../api/user";
 import { getNews } from "../../api/news";
+import axios from "axios";
+
 export default {
   name: "LoginIndex",
   components: {},
@@ -151,19 +153,21 @@ export default {
         message: "登录中..." // 提示消息
       });
       try {
-        // //getNews
-        // const { data } = await (await getNews(this.user)).data;
-        // this.$toast.success("获取成功");
-        // console.log(data);
         //发送登录请求
-        const { data } = await login(this.user);
-        this.$toast.success("登录成功");
+        const data = await login(this.user);
 
-        // 将后端返回的用户登录状态（ token 等数据）放到 Vuex 容器中
-        this.$store.commit("setUser", data.data);
+        console.log(data.data.code);
+        if (data.data.code == "200") {
+          this.$toast.success("登录成功");
+          console.log(data.data.token);
+          // 将后端返回的用户登录状态（ token 等数据）放到 Vuex 容器中
+          this.$store.commit("setUser", data.data);
 
-        // 界面跳转 到我的界面
-        this.$router.push("/my");
+          // 界面跳转 到我的界面
+          this.$router.push("/my");
+        } else {
+          throw "warning";
+        }
       } catch (err) {
         this.$toast.fail("登录失败，用户名或密码错误");
       }

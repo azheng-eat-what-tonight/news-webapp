@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { getUserChannels } from "../../api/user1";
+import { getUserChannels } from "../../api/user";
 import NewsList from "./component/news-list";
 
 export default {

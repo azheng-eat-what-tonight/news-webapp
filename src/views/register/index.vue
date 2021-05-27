@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import { register } from "../../api/user1";
+import { register } from "../../api/user";
 
 export default {
   name: "RegisterIndex",

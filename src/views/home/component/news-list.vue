@@ -61,13 +61,7 @@ export default {
     // 获取对应标签下的请求
     async onLoad() {
       try {
-        var data111 = {
-          pageNum: this.page,
-          page: 21
-        };
-        console.log(typeof data111);
-
-        const { data } = await getNews({ pageNum: this.page, page: 21 });
+        const { data } = await getNews({ pageNum: this.page });
         const results = data.data;
         // page = data.page + 1;
         this.newsList.push(...results);

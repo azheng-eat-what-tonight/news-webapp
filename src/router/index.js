@@ -26,21 +26,27 @@ const routes = [{
             component: () =>
                 import ('../views/home/'),
         }, {
-            path: '/qa',
-            name: 'qa',
+            path: '/rank',
+            name: 'rank',
             component: () =>
-                import ('../views/qa/'),
+                import ('../views/rank/'),
         }, {
-            path: '/video',
-            name: 'video',
+            path: '/pla',
+            name: 'pla',
             component: () =>
-                import ('../views/video/'),
+                import ('../views/pla/'),
         }, {
             path: '/my',
             name: 'my',
             component: () =>
                 import ('../views/my/'),
         }]
+    }, {
+        path: '/pla/:plaName',
+        name: 'plaItem',
+        component: () =>
+            import ('@/views/plaItem'),
+        props: true
     }
 
 ]
