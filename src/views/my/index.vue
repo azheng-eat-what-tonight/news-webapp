@@ -10,9 +10,9 @@
             class="avater"
             round
             fit="cover"
-            src="http://t.hk.uy/h2r"
+            :src="this.userInfo.user_picture"
           />
-          <div class="name" slot="title">昵称</div>
+          <div class="name" slot="title">{{ this.userInfo.user_username }}</div>
           <van-button class="update-btn" size="small" round slot="right-icon"
             >编辑资料</van-button
           >
@@ -37,13 +37,25 @@
     <!-- 数据信息 -->
     <div class="data-info">
       <van-grid class="nav-grid mb5" :column-num="3">
-        <van-grid-item class="nav-grid-item" icon="star-o" text="收藏新闻" />
         <van-grid-item
           class="nav-grid-item"
-          icon="browsing-history-o"
-          text="浏览记录"
+          icon="star-o"
+          text="收藏新闻"
+          :to="{ name: 'favNew' }"
         />
-        <van-grid-item class="nav-grid-item" icon="coupon-o" text="订阅平台" />
+        <van-grid-item
+          class="nav-grid-item"
+          icon="underway-o"
+          text="浏览记录"
+          :to="{ name: 'his' }"
+        />
+
+        <van-grid-item
+          class="nav-grid-item"
+          icon="coupon-o"
+          text="订阅平台"
+          :to="{ name: 'favPla' }"
+        />
       </van-grid>
       <van-cell center title="用户偏好">
         <div slot="label" class="user-like">
@@ -73,22 +85,26 @@ export default {
   components: {},
   props: {},
   data() {
-    return {};
+    return {
+      userInfo: {}
+    };
   },
   computed: {
     ...mapState(["user"])
   },
   watch: {},
   created() {
-    //this.loadCurrentUser();
+    this.loadCurrentUser();
   },
   mounted() {},
   methods: {
     // 登录时加载用户信息
     async loadCurrentUser() {
+      console.log("加载");
       try {
         const { data } = await getCurrentUser();
-        console.log(data);
+        this.userInfo = data.user;
+        console.log(data.user);
       } catch (e) {
         console.log(e);
       }

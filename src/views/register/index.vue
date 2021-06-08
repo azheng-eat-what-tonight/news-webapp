@@ -1,32 +1,37 @@
 <template>
   <div class="reg-container">
-    <!-- 头部导航栏 -->
-    <van-nav-bar
-      title="用户注册"
-      left-text="返回"
-      left-arrow
-      @click-left="onBack"
-    />
+    <!-- 顶部左侧按钮-->
+    <van-button class="top-btn" @click="onClickLeft" plain type="primary">
+      <van-icon slot="default" size="15px" name="arrow-left" />
+    </van-button>
+    <!-- /顶部左侧按钮-->
+    <!-- 文字 -->
+    <div class="font">
+      <font>CREATE NEW</font>
+      <font>ACCOUNT</font>
+    </div>
+
     <!-- 注册表单 -->
-    <van-form
-      :show-erro="false"
-      :show-error-message="false"
-      @submit="OnRegister"
-    >
+    <van-form @submit="OnRegister">
+      <!-- 用户名 -->
       <van-field
         v-model="regUser.username"
         name="用户名"
-        label="用户名"
         placeholder="用户名"
-        :rules="[{ required: true, message: '请填写用户名' }]"
+        :rules="[{ required: true }]"
       />
+      <!-- 密码 -->
       <van-field
         v-model="regUser.password1"
         :type="pwdType1"
         name="密码"
-        label="密码"
         placeholder="密码"
-        :rules="[{ required: true, message: '请填写密码' }]"
+        @focus.prevent="OnFocusSure"
+        :rules="[
+          {
+            required: true
+          }
+        ]"
       >
         <!-- 显示密码-->
         <template #button>
@@ -48,13 +53,20 @@
           />
         </template>
       </van-field>
+
+      <!-- 确认密码 -->
       <van-field
         v-model="regUser.password2"
         :type="pwdType2"
-        label="确认密码"
         placeholder="确认密码"
-        @focus.prevent="OnFocusSure"
-        :rules="[{ required: true, message: '请填写确认密码' }]"
+        @blur="OnFocusSure"
+        :rules="[
+          {
+            required: true,
+            validator: twoPasswordIsEqual,
+            message: '密码不一致'
+          }
+        ]"
       >
         <!-- 显示确认密码-->
         <template #button>
@@ -76,16 +88,47 @@
           />
         </template>
       </van-field>
+
+      <!-- 选择密保问题 -->
+      <van-field
+        readonly
+        clickable
+        :value="value"
+        placeholder="*选择您的密保问题"
+        @click.prevent="showQuestionPicker = true"
+        :rules="[{ required: false }]"
+      >
+        <van-icon slot="right-icon" name="arrow-down"></van-icon>
+      </van-field>
+      <!-- 密保问题弹出 -->
+      <van-popup v-model="showQuestionPicker" round position="bottom">
+        <van-picker
+          show-toolbar
+          :columns="questionColumns"
+          @cancel="showQuestionPicker = false"
+          @confirm="onConfirm"
+          :rules="[{ required: true }]"
+        />
+      </van-popup>
+      <!-- 密保答案输入 -->
+      <van-field
+        v-model="regUser.ans"
+        name="密保答案"
+        placeholder="密保答案"
+        :rules="[{ required: true, message: '请填写密保答案' }]"
+      />
       <!-- 提交注册 -->
-      <div style="margin: 16px;">
+      <div style="margin: 16px;" class="reg-submit">
         <van-button
           round
           block
           type="info"
           native-type="submit"
           @dbclick="OnRegister"
+          :disabled="isAble"
+          :rules="[{ required: true }]"
         >
-          提交
+          注 册
         </van-button>
       </div>
     </van-form>
@@ -105,14 +148,27 @@ export default {
       regUser: {
         username: "",
         password1: "",
-        password2: ""
+        password2: "",
+        ans: ""
       },
       // 密码框 切换显示密码变量
-      passwordShowIcon1: false,
+      passwordShowIcon1: true,
       pwdType1: "password",
       // 确认密码框
-      passwordShowIcon2: false,
-      pwdType2: "password"
+      passwordShowIcon2: true,
+      pwdType2: "password",
+
+      // 下拉菜单数据
+      value: "",
+      showQuestionPicker: false,
+      questionColumns: [
+        "你母亲的姓名是？",
+        "你母亲的姓名是？",
+        "你母亲的姓名是？",
+        "你母亲的姓名是？"
+      ],
+      // 密码不相等 无法点击按钮
+      isAble: true
     };
   },
   computed: {},
@@ -121,7 +177,7 @@ export default {
   mounted() {},
   methods: {
     // 返回
-    onBack() {
+    onClickLeft() {
       this.$router.back();
     },
 
@@ -134,13 +190,13 @@ export default {
       });
       try {
         // 发送注册请求
-        const { data } = await login1(this.user);
+        //const { data } = await login1(this.user);
         this.$toast.success("注册成功");
+        this.$router.push("/userLike");
       } catch (e) {
         this.$toast.fail("登录失败，用户名或密码错误");
-
         // 注册成功，跳转到登录界面
-        this.$router.push("/login");
+        this.$router.push("/userLike");
       }
     },
 
@@ -156,16 +212,79 @@ export default {
       this.passwordShowIcon2 = !this.passwordShowIcon2;
       this.pwdType2 = this.pwdType2 === "password" ? "text" : "password";
     },
+    twoPasswordIsEqual(val) {
+      return new Promise(resolve => {
+        resolve(this.regUser.password2 === this.regUser.password1);
+      });
+    },
 
     // 焦点在确认密码上是，检验密码
     OnFocusSure() {
-      console.log("密码是否相等");
+      if (
+        this.regUser.password2 === this.regUser.password1 &&
+        this.regUser.password1 != "" &&
+        this.regUser.password2 != ""
+      ) {
+        this.isAble = false;
+      } else {
+        this.isAble = true;
+      }
+    },
+    // 选择密保问题
+    onConfirm(value) {
+      this.value = value;
+      this.showQuestionPicker = false;
     }
   }
 };
 </script>
 
 <style scoped lang="less">
+.reg-container {
+  // 返回按钮
+  .top-btn {
+    margin: 2% 2%;
+  }
+  // 文字
+  .font {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 70px;
+    font {
+      display: block;
+      // font-family: "Times New Roman", Georgia, Serif;
+      font-size: 24px;
+      font-weight: 300;
+      color: rgb(176, 176, 177);
+      margin-top: 10px;
+    }
+  }
+  // 表单
+  .van-form {
+    // 输入框
+    /deep/.van-cell {
+      display: block;
+      box-sizing: border-box;
+      width: 286px;
+      margin-left: 12%;
+      border: 1px solid rgb(236, 236, 236);
+      border-radius: 6%;
+      margin-bottom: 10px;
+    }
+
+    // 按钮
+    .reg-submit {
+      margin-top: 3% !important;
+      .van-button {
+        margin-top: 30px;
+        width: 266px;
+        margin-left: 12%;
+        box-shadow: 5px 5px 5px rgb(179, 218, 218);
+      }
+    }
+  }
+}
+
 .eyes {
   background: white !important;
   border: none;

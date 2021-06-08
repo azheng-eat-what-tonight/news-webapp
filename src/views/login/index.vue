@@ -1,13 +1,20 @@
 <template>
-  <div>
-    <div class="login-container"></div>
-    <!-- 顶部 -->
-    <van-nav-bar
-      title="登录"
-      left-text="返回"
-      left-arrow
-      @click-left="onClickLeft"
+  <div class="login-container">
+    <!-- 顶部左侧按钮-->
+    <van-button class="top-btn" @click="onClickLeft" plain type="primary">
+      <van-icon slot="default" size="15px" name="arrow-left" />
+    </van-button>
+    <!-- /顶部左侧按钮-->
+
+    <van-image
+      class="logo"
+      width="80%"
+      :src="require('@/assets/img/logo-img+font.2.png')"
     />
+    <div class="font">
+      <font>W E L C O M E</font>
+    </div>
+
     <!-- 表单 -->
     <van-form
       :show-erro="false"
@@ -19,19 +26,22 @@
       <van-field
         v-model="user.username"
         name="用户名"
-        label="用户名"
-        left-icon="user-circle-o"
         placeholder="用户名"
         :rules="[{ required: true, message: '请填写用户名' }]"
+        @focus="addBorderColor"
+        @blur="deleteBorderColor"
+        :class="{ 'van-cell-add': addColor }"
+        clearable
       />
       <!-- 密码框 -->
       <van-field
         v-model="user.password"
         :type="pwdType"
         name="密码"
-        left-icon="points"
-        label="密码"
         placeholder="密码"
+        :class="{ 'van-cell-add': addColor1 }"
+        @focus="addBorderColor1"
+        @blur="deleteBorderColor1"
         :rules="[{ required: true, message: '请填写密码' }]"
       >
         <!-- 显示密码-->
@@ -54,6 +64,10 @@
           />
         </template>
       </van-field>
+      <!-- 忘记密码-->
+      <van-button size="mini" type="primary" to="/register">
+        忘记密码?
+      </van-button>
       <!-- 提交按钮 -->
       <div style="margin: 16px;" class="login-submit">
         <van-button
@@ -62,26 +76,25 @@
           type="info"
           @dblclick="onLogin"
           native-type="submit"
-          >提交</van-button
+          >登 录</van-button
         >
       </div>
     </van-form>
-    <!-- 用户其他界面 -->
-    <van-row style="margin-top:30px">
-      <van-col span="7"></van-col>
-      <van-col to="/" span="4">
-        <van-button size="mini" type="primary" to="/register">
-          注册
-        </van-button>
-      </van-col>
-      <van-col span="2"></van-col>
-      <van-col span="4">
-        <van-button size="mini" type="primary" to="/register">
-          忘记密码
-        </van-button>
-      </van-col>
-      <van-col span="7"></van-col>
-    </van-row>
+    <!-- /表单 -->
+
+    <div class="reg-all">
+      <span class="reg-font">
+        没有账户？
+      </span>
+      <van-button
+        text="注册"
+        size="small"
+        class="reg-btn"
+        type="primary"
+        to="/register"
+      >
+      </van-button>
+    </div>
   </div>
 </template>
 
@@ -98,15 +111,18 @@ export default {
     return {
       //用户表单数据
       user: {
-        username: "1",
-        password: "1"
+        username: "",
+        password: ""
       },
       //是否显示密码
       passwordShowIcon: true,
       //密码类型
-      pwdType: "password"
+      pwdType: "password", // 添加样色
 
       // 请求期间禁用按钮点击
+
+      addColor: false,
+      addColor1: false
     };
   },
   computed: {},
@@ -155,7 +171,7 @@ export default {
       try {
         //发送登录请求
         const data = await login(this.user);
-
+        console.log(this.user);
         console.log(data.data.code);
         if (data.data.code == "200") {
           this.$toast.success("登录成功");
@@ -171,23 +187,109 @@ export default {
       } catch (err) {
         this.$toast.fail("登录失败，用户名或密码错误");
       }
+    },
+
+    // 给输入框加样式
+    addBorderColor() {
+      this.addColor = true;
+    },
+    // 给输入框减样式
+    deleteBorderColor() {
+      this.addColor = false;
+    },
+    // 给输入框加样式
+    addBorderColor1() {
+      this.addColor1 = true;
+    },
+    // 给输入框减样式
+    deleteBorderColor1() {
+      this.addColor1 = false;
     }
   }
 };
 </script>
 
 <style lang="less" scoped>
+.login-container {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+}
+// 返回按钮
+.top-btn {
+  margin: 2% 2%;
+}
+
+// logo
+.logo {
+  margin-left: 41px;
+  margin-top: -35px;
+}
+
+// logo下的文字
+.font {
+  text-align: center;
+  margin-bottom: 35px;
+  font {
+    // font-family: "Times New Roman", Georgia, Serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: rgb(176, 176, 177);
+  }
+}
+
+// 表单
+.van-form {
+  // 用户名框
+  .van-cell:first-child {
+    margin-bottom: 10px;
+  }
+  // 输入框
+  /deep/.van-cell {
+    display: block;
+    box-sizing: border-box;
+    width: 286px;
+    margin-left: 12%;
+    border: 1px solid rgb(236, 236, 236);
+    border-radius: 6%;
+  }
+  .van-cell-add {
+    border: 2px solid rgb(100, 149, 237);
+  }
+  // 忘记密码
+  .van-button--mini:nth-child(3) {
+    width: 75px;
+    text-align: right;
+    margin-left: 72%;
+  }
+  // 提交按钮
+  .login-submit {
+    margin-top: 3% !important;
+    .van-button {
+      width: 266px;
+      margin-left: 12%;
+      box-shadow: 5px 5px 5px rgb(179, 218, 218);
+    }
+  }
+}
+// 显示密码
 .eyes {
   background: white !important;
   border: none;
 }
-.login-submit {
-  margin-top: 30px !important;
-}
-// 文字位置
-.van-col--4 {
-  font-size: 10px;
+
+// 注册文字
+.reg-all {
+  margin-top: 30px;
   text-align: center;
+  font-size: 14px;
+  color: rgb(128, 128, 128);
+  .reg-font {
+    display: block;
+  }
+  .reg-btn {
+    color: rgb(251, 180, 171);
+  }
 }
 //清除按钮中不必要格式
 .van-button--primary {

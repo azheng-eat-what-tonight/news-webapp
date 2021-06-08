@@ -55,20 +55,21 @@ export default {
       }
     },
     // 跳转平台
-    /**
-     * path: '/pla/:plaId',
-        name: 'plaItem',
-        component: () =>
-            import ('@/views/plaItem'),
-        props: true
-     */
-    // pla_id: 1,
-    //     news_pla: "知乎"
     toPla(item) {
+      const info = {
+        id: item.pla_id,
+        name: item.pla_name
+      };
+      let jsonInfo = JSON.stringify(info);
+
       this.$router.push({
         name: "plaItem",
         params: {
-          plaName: item.pla_name
+          plaInfo: jsonInfo
+          // {
+          //   id: pla_id,
+          //   name: pla_name
+          // }
         }
       });
     }

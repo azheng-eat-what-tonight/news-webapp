@@ -6,9 +6,9 @@ import axios from "axios"
 import store from '@/store/'
 
 const request = axios.create({
-    baseURL: "http://172.31.44.142:8081/" // 实验室 基础路径
-        // baseURL: "http://10.20.171.246:8080/" //bnuz
-        //baseURL: "http://10.16.91.152:8081/" //宿舍
+    // baseURL: "http://172.31.44.142:8081/" // 实验室 基础路径
+    // baseURL: "http://10.20.171.246:8080/" //bnuz
+    baseURL: "http://10.16.91.152:8081/" //宿舍
         //baseURL: "http://10.20.189.182:8080/"
 });
 
@@ -21,7 +21,7 @@ request.interceptors.request.use(function(config) {
     if (user) {
         config.headers.Authorization = `${user.token}`
     }
-    console.log("DAWDWAD:" + config.headers.Authorization)
+    // console.log("用户token:" + config.headers.Authorization)
     return config;
 }, function(error) {
     // Do something with request error

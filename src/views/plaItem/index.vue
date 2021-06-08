@@ -5,14 +5,25 @@
       <van-overlay class-name="overlay" :show="show">
         <div class="mid">
           <van-image class="mid-img" round :src="this.plaLogo" />
-          <div class="mid-name">{{ this.plaName }} 热榜</div>
+          <div class="mid-name">{{ this.plaInfo.name }} 热榜</div>
           <div class="mid-info">2645条数据 / 147574人订阅</div>
           <van-button
             class="mid-btn"
             size="small"
             color="linear-gradient(to right, #ff6034, #ee0a24)"
+            v-if="isSub"
+            @click="userSub"
           >
-            订阅
+            + 订阅
+          </van-button>
+          <van-button
+            class="mid-btn"
+            size="small"
+            color="rgb(133, 144, 166)"
+            v-else
+            @click="userUnsub"
+          >
+            已订阅
           </van-button>
         </div>
       </van-overlay>
@@ -25,7 +36,14 @@
       @click-left="onClickLeft"
     />
 
-    <van-cell v-for="item in plaNewList" :key="item.news_id">
+    <van-cell
+      class="news-list"
+      v-for="(item, index) in plaNewList"
+      :key="item.news_id"
+    >
+      <div class="rank-num" slot="icon">
+        {{ index + 1 }}
+      </div>
       <news-item :news="item" />
     </van-cell>
     <!-- <v-cell></v-cell>
@@ -35,6 +53,7 @@
 
 <script>
 import { getPlaNews } from "@/api/news";
+import { isSubscribePla, unsubscribePla, subscribePla } from "@/api/user";
 import NewsItem from "@/components/news-item";
 
 export default {
@@ -43,47 +62,79 @@ export default {
     NewsItem
   },
   props: {
-    plaName: {
+    plaInfo: {
       type: String,
       required: true
     }
   },
   data() {
     return {
-      // pla_news: {
-      //   pla_id: plaId.pla_id,
-      //   news_pla: plaId.news_pla
-      // },
       plaNewList: [],
       plaLogo: "",
       show: true,
-      plaId: {}
+      isSub: true,
+      jsonInfo: {}
     };
   },
-  computed: {},
+  computed: {
+    derList() {
+      return this.$store.state.orderList;
+    }
+  },
   watch: {},
   created() {
+    // 获取平台新闻列表
     this.loadPlaItem();
+    // 获取平台订阅状况
+    this.userIsSub();
   },
   mounted() {},
   methods: {
+    // 加载对应平台数据
     async loadPlaItem() {
-      // 1.加载对应平台数据
-      // 2放入数据
       try {
-        console.log(this.plaName);
-        console.log(typeof this.plaName);
-        var c = {
-          plaid: "1",
-          news_pla: this.plaName
-        };
-        const { data } = await getPlaNews(c);
+        this.jsonInfo = JSON.parse(this.plaInfo);
+        const { data } = await getPlaNews({ pla_id: this.jsonInfo.id });
         const results = data.data;
         this.plaNewList.push(...results);
         console.log(this.plaNewList[0]);
         this.plaLogo = this.plaNewList[0].news_logo;
       } catch (e) {
         console.log(e);
+      }
+    },
+    // 订阅 subscribePla
+    async userSub() {
+      try {
+        await subscribePla({ pla_id: this.jsonInfo.id });
+        this.isSub = !this.isSub;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    // 用户取消订阅 unsubscribePla
+    async userUnsub() {
+      try {
+        await unsubscribePla({ pla_id: this.jsonInfo.id });
+        this.isSub = !this.isSub;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    // 用户是否订阅 isSubsribePla
+    async userIsSub() {
+      try {
+        const { data } = await isSubscribePla({ pla_id: this.jsonInfo.id });
+        const subDetail = data.detail;
+        console.log(subDetail);
+        if (subDetail == "未订阅") {
+          this.isSub = true;
+        } else {
+          this.isSub = false;
+        }
+      } catch (e) {
+        console.log(e);
+        this.$toast.fail("获取订阅状态失败");
       }
     },
     // 返回之前界面
@@ -110,6 +161,35 @@ export default {
         color: rgb(180, 180, 180);
       }
     }
+  }
+
+  .news-list {
+    box-sizing: border-box;
+    .rank-num {
+      margin-top: 9px;
+    }
+  }
+  // 前三名 加粗
+  .news-list:nth-child(-n + 5) {
+    .rank-num {
+      font-weight: 600;
+      font-size: 16px;
+    }
+  }
+  // 第一名
+  .news-list:nth-child(3) {
+    color: rgb(252, 80, 81, 0);
+    .rank-num {
+      font-size: 16px;
+    }
+  }
+  // 第二名
+  .news-list:nth-child(4) {
+    color: rgb(241, 130, 8, 0);
+  }
+  //第三名
+  .news-list:nth-child(5) {
+    color: rgb(225, 171, 119, 0);
   }
   // image
   .image {
@@ -144,6 +224,7 @@ export default {
         color: white;
       }
       .mid-btn {
+        border-radius: 6px !important;
         margin-top: 6%;
       }
     }

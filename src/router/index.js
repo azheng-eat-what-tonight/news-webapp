@@ -17,6 +17,12 @@ const routes = [{
             import ('../views/register/')
     },
     {
+        path: '/userLike',
+        name: 'userLike',
+        component: () =>
+            import ('../views/pickUserLike/')
+    },
+    {
         path: '/',
         component: () =>
             import ('../views/layout/'),
@@ -42,13 +48,28 @@ const routes = [{
                 import ('../views/my/'),
         }]
     }, {
-        path: '/pla/:plaName',
+        path: '/pla/:plaInfo',
         name: 'plaItem',
         component: () =>
             import ('@/views/plaItem'),
         props: true
+    }, {
+        path: '/my/favNew',
+        name: 'favNew',
+        component: () =>
+            import ('../views/my/favNew'),
+    },
+    {
+        path: '/my/favPla',
+        name: 'favPla',
+        component: () =>
+            import ('../views/my/favPla'),
+    }, {
+        path: '/my/his',
+        name: 'his',
+        component: () =>
+            import ('../views/my/his'),
     }
-
 ]
 
 const router = new VueRouter({
