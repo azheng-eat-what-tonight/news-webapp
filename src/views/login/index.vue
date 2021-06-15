@@ -65,8 +65,8 @@
         </template>
       </van-field>
       <!-- 忘记密码-->
-      <van-button size="mini" type="primary" to="/register">
-        忘记密码?
+      <van-button size="mini" type="primary" to="/cORfPassword">
+        忘记 / 修改密码?
       </van-button>
       <!-- 提交按钮 -->
       <div style="margin: 16px;" class="login-submit">
@@ -99,9 +99,7 @@
 </template>
 
 <script>
-import { login } from "../../api/user";
-import { getNews } from "../../api/news";
-import axios from "axios";
+import { login, isInit } from "../../api/user";
 
 export default {
   name: "LoginIndex",
@@ -120,7 +118,6 @@ export default {
       pwdType: "password", // 添加样色
 
       // 请求期间禁用按钮点击
-
       addColor: false,
       addColor1: false
     };
@@ -168,24 +165,37 @@ export default {
         forbidClick: true, // 是否禁止背景点击
         message: "登录中..." // 提示消息
       });
-      try {
-        //发送登录请求
-        const data = await login(this.user);
-        console.log(this.user);
-        console.log(data.data.code);
-        if (data.data.code == "200") {
-          this.$toast.success("登录成功");
-          console.log(data.data.token);
-          // 将后端返回的用户登录状态（ token 等数据）放到 Vuex 容器中
-          this.$store.commit("setUser", data.data);
+      if (this.user.username != "" && this.user.password != "") {
+        try {
+          //发送登录请求
+          var data = await login(this.user);
+          if (data.data.code == "200") {
+            console.log(data);
+            const data1 = await isInit({
+              user_logname: this.user.username
+            });
 
-          // 界面跳转 到我的界面
-          this.$router.push("/my");
-        } else {
-          throw "warning";
+            if (data1.data.code == 11) {
+              // 将后端返回的用户登录状态（ token 等数据）放到 Vuex 容器中
+              this.$store.commit("setUser", data.data);
+              this.$toast.success("登录成功");
+              // 界面跳转 到我的界面
+              this.$router.push("/my");
+            } else {
+              this.$toast.fail("需要进行初始化");
+              this.$router.push({
+                name: "userLike",
+                params: { uname: this.user.username }
+              });
+            }
+          } else {
+            throw "warning";
+          }
+        } catch (err) {
+          this.$toast.fail("登录失败，用户名或密码错误");
         }
-      } catch (err) {
-        this.$toast.fail("登录失败，用户名或密码错误");
+      } else {
+        this.$toast.fail("用户名/密码为空");
       }
     },
 
@@ -258,9 +268,9 @@ export default {
   }
   // 忘记密码
   .van-button--mini:nth-child(3) {
-    width: 75px;
+    width: 125px;
     text-align: right;
-    margin-left: 72%;
+    margin-left: 225px;
   }
   // 提交按钮
   .login-submit {

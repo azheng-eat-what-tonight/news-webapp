@@ -25,8 +25,7 @@
 </template>
 
 <script>
-import { getNews } from "@/api/news";
-//import NewItems from "@/components/news-item/";
+import { getNews, getTypeNews, recommend } from "@/api/news";
 import NewsItem from "@/components/news-item";
 
 export default {
@@ -53,19 +52,35 @@ export default {
   },
   computed: {},
   watch: {},
-  created() {
-    getNews();
-  },
+  created() {},
   mounted() {},
   methods: {
     // 获取对应标签下的请求
     async onLoad() {
       try {
-        const { data } = await getNews({ pageNum: this.page });
+        if (this.channel.typeName == "推荐") {
+          var { data } = await recommend({
+            type_name: this.channel.typeName,
+            pageNum: this.page
+          });
+        } else {
+          var { data } = await getTypeNews({
+            type_name: this.channel.typeName,
+            pageNum: this.page
+          });
+        }
         const results = data.data;
-        // page = data.page + 1;
+        // console.log(results.length);
         this.newsList.push(...results);
         this.loading = false;
+        // 4. 数据全部加载完成
+        if (results.length) {
+          // 更新获取下一页数据的页码
+          this.page++;
+        } else {
+          // 没有数据了，把加载状态设置结束，不再触发加载更多
+          this.finished = true;
+        }
       } catch (e) {
         this.$toast.fail("获取内容失败");
       }
@@ -73,14 +88,27 @@ export default {
     // 下拉刷新
     async onRefresh() {
       try {
-        // getNews 获取对应标签下的请求
-        const { data } = await getNews({
-          page: 1
-        });
+        if (this.channel.typeName == "推荐") {
+          var { data } = await recommend({
+            type_name: this.channel.typeName,
+            pageNum: this.page
+          });
+        } else {
+          var { data } = await getTypeNews({
+            type_name: this.channel.typeName,
+            pageNum: this.page
+          });
+        }
+        this.page++;
         // 2. 把数据放到数据列表中（往顶部追加）
         const results = data.data;
+
         this.newsList.unshift(...results);
-        this.refreshSuccessText = `更新了${results.length}条数据`;
+        if (results.length) {
+          this.refreshSuccessText = `更新了${results.length}条数据`;
+        } else {
+          this.refreshSuccessText = `数据已全部展示`;
+        }
       } catch (e) {
         this.$toast.fail("获取内容失败");
       }

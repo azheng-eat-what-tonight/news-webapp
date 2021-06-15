@@ -1,14 +1,16 @@
 <template>
   <div class="home-container">
     <!-- 导航栏 -->
+
     <van-nav-bar class="home-top">
-      <van-icon slot="left" name="hot" size="30px" dot />
+      <van-icon slot="left" class-prefix="hnm" name="zu2557" size="30px" />
       <van-button
         slot="title"
         icon="search"
         round
         size="small"
         class="search-btn"
+        to="search"
         >搜索
       </van-button>
     </van-nav-bar>
@@ -18,8 +20,8 @@
     <van-tabs v-model="activeName" swipeable>
       <van-tab
         v-for="channel in channels"
-        :key="channel.id"
-        :title="channel.name"
+        :key="channel.typeId"
+        :title="channel.typeName"
       >
         <!-- 新闻列表 -->
         <news-list :channel="channel"></news-list>
@@ -32,6 +34,7 @@
 
 <script>
 import { getUserChannels } from "../../api/user";
+import { getAllType } from "@/api/news";
 import NewsList from "./component/news-list";
 
 export default {
@@ -58,20 +61,11 @@ export default {
     // 请求各频道数据
     async loadChannels() {
       //请求频道数据
-      //  const data = await getUserChannels();
-      // this.channels = data.data.channels
-      // 得到id+name
-      var c = new Array();
-      c = [
-        { id: 0, name: "推荐" },
-        { id: 1, name: "娱乐" },
-        { id: 2, name: "政治" },
-        { id: 3, name: "科技" },
-        { id: 4, name: "民生" },
-        { id: 5, name: "手工" },
-        { id: 6, name: "购物" }
-      ];
-      this.channels = c;
+      const { data } = await getAllType();
+      // console.log(data.data);
+      this.channels = data.data;
+      // this.channels.unshift({ typeId: 0, typeName: "推荐" });
+      this.channels.unshift({ typeId: 0, typeName: "推荐" });
     }
   }
 };

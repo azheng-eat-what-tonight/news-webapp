@@ -22,17 +22,17 @@
       <van-grid :column-num="3" :gutter="10" :border="false" class="grid">
         <van-checkbox-group
           v-model="checkResult"
-          :max="5"
+          :max="6"
           direction="horizontal"
         >
-          <van-grid-item v-for="(item, index) in newsType" :key="item">
+          <van-grid-item v-for="(item, index) in typeList" :key="item.typeId">
             <van-checkbox
-              :name="item"
+              :name="item.typeId"
               class="check-btn"
               v-model="checked[index]"
               checked-color="rgb(179, 218, 218)"
             >
-              {{ item }}
+              {{ item.typeName }}
             </van-checkbox>
           </van-grid-item>
         </van-checkbox-group>
@@ -48,28 +48,21 @@
 </template>
 
 <script>
+import { getAllType } from "@/api/news";
+import { chooseUserLikeType } from "@/api/user";
+
 export default {
   name: "pickUserLikeIndex",
   components: {},
-  props: {},
+  props: {
+    uname: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      newsType: [
-        "财经",
-        "彩票",
-        "房产",
-        "股票",
-        "家居",
-        "科技",
-        "社会",
-        "时政",
-        "时尚",
-        "体育",
-        "星座",
-        "游戏",
-        "娱乐",
-        "教育"
-      ],
+      typeList: [],
       checked: [],
       checkedNum: [],
       checkResult: [],
@@ -94,26 +87,43 @@ export default {
     onClickLeft() {
       this.$router.back();
     },
-    // 提交自己喜欢的
-    onPickLike() {},
+
+    // 提交用户喜欢的typeid
+    async onPickLike() {
+      if (this.checkedLength < 3) {
+        this.$toast.fail("失败，选择类别小于3个");
+      } else {
+        try {
+          console.log(this.checkResult);
+          console.log(typeof this.checkResult);
+          const data = await chooseUserLikeType({
+            type_id: this.checkResult,
+            user_logname: this.uname
+          });
+          // console.log(data);
+          if (data.status == 200) {
+            this.$toast.success({ message: "完善资料成功", duration: 2000 });
+            this.$router.push("/login");
+          } else {
+            this.$toast.fail("完善资料失败");
+          }
+        } catch (e) {
+          this.$toast.fail("资料已完善");
+        }
+      }
+    },
     // begin
-    begin() {
-      this.checked = [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ];
+    async begin() {
+      try {
+        console.log("username：" + this.uname);
+        const { data } = await getAllType();
+        this.typeList = data.data;
+        // console.log(this.typeList);
+        const lenght = this.typeList.length;
+        this.checked = new Array(lenght).fill(0);
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 };

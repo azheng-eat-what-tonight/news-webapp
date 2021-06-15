@@ -21,7 +21,9 @@ export default {
   props: {},
   data() {
     return {
-      newsList: []
+      newsList: [],
+      newsIdList: [],
+      isCollected: []
     };
   },
   computed: {},
@@ -31,10 +33,26 @@ export default {
   },
   mounted() {},
   methods: {
+    // 获取用户收藏的新闻
     async getUserFavNews() {
       var { data } = await getCollectionNews();
       this.newsList = data.data;
-      console.log(this.newsList);
+
+      for (const i in this.newsList) {
+        this.newsIdList.push(this.newsList[i].news_id);
+      }
+      // this.checkIsCollectionNews();
+    },
+    // 获取用户收藏的新闻标记
+    async checkIsCollectionNews() {
+      try {
+        const { data } = await isCollectionNews({
+          news_id: this.newsIdList
+        });
+        isCollected = data.data;
+      } catch (e) {
+        console.log(e);
+      }
     },
     // 返回之前界面
     onClickLeft() {

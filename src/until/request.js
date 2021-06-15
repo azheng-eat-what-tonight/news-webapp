@@ -7,6 +7,7 @@ import store from '@/store/'
 
 const request = axios.create({
     // baseURL: "http://172.31.44.142:8081/" // 实验室 基础路径
+    // baseURL: "http://172.31.44.145:8081/"
     // baseURL: "http://10.20.171.246:8080/" //bnuz
     baseURL: "http://10.16.91.152:8081/" //宿舍
         //baseURL: "http://10.20.189.182:8080/"

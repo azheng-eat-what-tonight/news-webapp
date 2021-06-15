@@ -13,15 +13,20 @@
             :src="this.userInfo.user_picture"
           />
           <div class="name" slot="title">{{ this.userInfo.user_username }}</div>
-          <van-button class="update-btn" size="small" round slot="right-icon"
-            >编辑资料</van-button
-          >
+          <van-button
+            class="update-btn"
+            size="small"
+            round
+            slot="right-icon"
+            :to="{ name: 'updateInfo' }"
+            >编辑资料
+          </van-button>
         </van-cell>
       </van-cell-group>
 
       <!-- 没有登录 -->
       <div v-else class="not-login">
-        <div @click="tologin">
+        <div class="not-btn" @click="tologin">
           <van-button
             class="unlog-image"
             type="default"
@@ -35,7 +40,7 @@
     </div>
 
     <!-- 数据信息 -->
-    <div class="data-info">
+    <div v-if="user" class="data-info">
       <van-grid class="nav-grid mb5" :column-num="3">
         <van-grid-item
           class="nav-grid-item"
@@ -59,12 +64,12 @@
       </van-grid>
       <van-cell center title="用户偏好">
         <div slot="label" class="user-like">
-          <span>娱乐(98)</span>
-          <span>科技(70)</span>
-          <span>民生(62)</span>
+          <span v-for="(item, index) in like_value" :key="index">
+            {{ index }}({{ item }})
+          </span>
         </div>
       </van-cell>
-      <van-cell class="mb5" title="问题反馈" is-link to="/" />
+      <van-cell class="mb5" title="关于我们" @click="aboutUs" />
       <!-- 退出登录 -->
       <van-cell
         v-if="user"
@@ -79,6 +84,8 @@
 <script>
 import { mapState } from "vuex";
 import { getCurrentUser } from "@/api/user";
+import { getItem } from "@/until/storage";
+import store from "@/store/";
 
 export default {
   name: "MyIndex",
@@ -86,7 +93,8 @@ export default {
   props: {},
   data() {
     return {
-      userInfo: {}
+      userInfo: {},
+      like_value: {}
     };
   },
   computed: {
@@ -100,13 +108,20 @@ export default {
   methods: {
     // 登录时加载用户信息
     async loadCurrentUser() {
-      console.log("加载");
-      try {
-        const { data } = await getCurrentUser();
-        this.userInfo = data.user;
-        console.log(data.user);
-      } catch (e) {
-        console.log(e);
+      // 判断有没有token
+      const { user } = store.state;
+      if (user != null) {
+        try {
+          const { data } = await getCurrentUser();
+          this.userInfo = data.user;
+          // console.log(data.like_value);
+
+          this.like_value = data.like_value;
+        } catch (e) {
+          this.$toast.fail("获取用户信息失败");
+        }
+      } else {
+        this.$toast.fail("未登录");
       }
     },
     // 去登录界面
@@ -128,6 +143,24 @@ export default {
           this.$store.commit("setUser", null);
         })
         .catch(() => {});
+    },
+    //关于我们 弹窗
+    aboutUs() {
+      this.$dialog
+        .alert({
+          title: "关于我们",
+          message: "本界面由AC小组共同完成\n解释权归本组所有。"
+        })
+        .then(() => {});
+      /**
+ * Dialog.alert({
+  title: '标题',
+  message: '弹窗内容',
+}).then(() => {
+  // on close
+});
+
+ */
     }
   }
 };
@@ -180,6 +213,9 @@ export default {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      .not-btn {
+        margin-top: 120px;
+      }
       .unlog-image {
         margin-top: 100px;
         opacity: 0.8;
@@ -238,8 +274,5 @@ export default {
       margin-bottom: 4px;
     }
   }
-
-  //van-button van-button--default van-button--large van-dialog__confirm van-hairline--left
-  //van-button van-button--default van-button--large van-dialog__cancel
 }
 </style>

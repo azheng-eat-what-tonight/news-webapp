@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 import Vant from 'vant'
 import { Toast } from "vant";
+import { Dialog } from "vant";
 import './until/day'
 // 加载设置rem基准值
 import 'amfe-flexible'
@@ -16,6 +17,11 @@ import './style/index.less'
 //全局注册Vant组件
 Vue.use(Vant)
 
+import Router from 'vue-router'
+const routerPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+    return routerPush.call(this, location).catch(error => error)
+}
 Vue.config.productionTip = false
 
 new Vue({

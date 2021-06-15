@@ -15,14 +15,14 @@
     <van-form @submit="OnRegister">
       <!-- 用户名 -->
       <van-field
-        v-model="regUser.username"
+        v-model="registerParam.user_logname"
         name="用户名"
         placeholder="用户名"
         :rules="[{ required: true }]"
       />
       <!-- 密码 -->
       <van-field
-        v-model="regUser.password1"
+        v-model="regUser.password"
         :type="pwdType1"
         name="密码"
         placeholder="密码"
@@ -104,6 +104,7 @@
       <van-popup v-model="showQuestionPicker" round position="bottom">
         <van-picker
           show-toolbar
+          value-key="questionContent"
           :columns="questionColumns"
           @cancel="showQuestionPicker = false"
           @confirm="onConfirm"
@@ -112,7 +113,7 @@
       </van-popup>
       <!-- 密保答案输入 -->
       <van-field
-        v-model="regUser.ans"
+        v-model="registerParam.answer"
         name="密保答案"
         placeholder="密保答案"
         :rules="[{ required: true, message: '请填写密保答案' }]"
@@ -136,7 +137,7 @@
 </template>
 
 <script>
-import { register } from "../../api/user";
+import { register, getAllQuestion } from "../../api/user";
 
 export default {
   name: "RegisterIndex",
@@ -146,10 +147,14 @@ export default {
     return {
       // 注册表单数据
       regUser: {
-        username: "",
-        password1: "",
-        password2: "",
-        ans: ""
+        password: "",
+        password2: ""
+      },
+      registerParam: {
+        user_logname: "",
+        password: "",
+        question_id: "",
+        answer: ""
       },
       // 密码框 切换显示密码变量
       passwordShowIcon1: true,
@@ -161,27 +166,31 @@ export default {
       // 下拉菜单数据
       value: "",
       showQuestionPicker: false,
-      questionColumns: [
-        "你母亲的姓名是？",
-        "你母亲的姓名是？",
-        "你母亲的姓名是？",
-        "你母亲的姓名是？"
-      ],
+      questionColumns: [],
       // 密码不相等 无法点击按钮
       isAble: true
     };
   },
   computed: {},
   watch: {},
-  created() {},
+  created() {
+    this.getAllQ();
+  },
   mounted() {},
   methods: {
     // 返回
     onClickLeft() {
       this.$router.back();
     },
+    // 获取全部密保问题
+    async getAllQ() {
+      const { data } = await getAllQuestion();
+      this.questionColumns = data.data;
+      // console.log(data.data);
+    },
 
     // 提交注册
+    //  参数：user_logmane,password,question_id,answer
     async OnRegister() {
       this.$toast.loading({
         duration: 0, // 持续时间，0表示持续展示不停止
@@ -189,20 +198,32 @@ export default {
         message: "注册中..." // 提示消息
       });
       try {
+        this.registerParam.password = this.regUser.password;
         // 发送注册请求
-        //const { data } = await login1(this.user);
-        this.$toast.success("注册成功");
-        this.$router.push("/userLike");
+        const { data } = await register(this.registerParam);
+        if (data.code == 400) {
+          throw data.detail;
+        }
+        console.log(data.cede);
+        this.$toast.success({ message: "注册成功", duration: 2000 });
+        // 注册成功，跳转到兴趣选择
+        this.$router.push({
+          name: "userLike",
+          params: { uname: this.registerParam.user_logname }
+        });
       } catch (e) {
-        this.$toast.fail("登录失败，用户名或密码错误");
-        // 注册成功，跳转到登录界面
-        this.$router.push("/userLike");
+        this.$toast.fail({ message: e, duration: 1800 });
       }
     },
-
+    // 选择密保问题
+    onConfirm(value) {
+      this.registerParam.question_id = value.questionId;
+      this.value = value.questionContent;
+      this.showQuestionPicker = false;
+    },
     // 密码显示
     showPassword1() {
-      console.log(this.passwordShowIcon1);
+      // console.log(this.passwordShowIcon1);
       this.passwordShowIcon1 = !this.passwordShowIcon1;
       this.pwdType1 = this.pwdType1 === "password" ? "text" : "password";
     },
@@ -212,28 +233,25 @@ export default {
       this.passwordShowIcon2 = !this.passwordShowIcon2;
       this.pwdType2 = this.pwdType2 === "password" ? "text" : "password";
     },
+
+    // 检验两次密码是否相等
     twoPasswordIsEqual(val) {
       return new Promise(resolve => {
-        resolve(this.regUser.password2 === this.regUser.password1);
+        resolve(this.regUser.password2 === this.regUser.password);
       });
     },
 
     // 焦点在确认密码上是，检验密码
     OnFocusSure() {
       if (
-        this.regUser.password2 === this.regUser.password1 &&
-        this.regUser.password1 != "" &&
+        this.regUser.password2 === this.regUser.password &&
+        this.regUser.password != "" &&
         this.regUser.password2 != ""
       ) {
         this.isAble = false;
       } else {
         this.isAble = true;
       }
-    },
-    // 选择密保问题
-    onConfirm(value) {
-      this.value = value;
-      this.showQuestionPicker = false;
     }
   }
 };

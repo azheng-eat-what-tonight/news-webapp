@@ -5,8 +5,12 @@
       <van-overlay class-name="overlay" :show="show">
         <div class="mid">
           <van-image class="mid-img" round :src="this.plaLogo" />
-          <div class="mid-name">{{ this.plaInfo.name }} 热榜</div>
-          <div class="mid-info">2645条数据 / 147574人订阅</div>
+          <div class="mid-name">
+            {{ this.jsonInfo.name }}
+          </div>
+          <div class="mid-info">
+            {{ countNews }}条数据 / {{ countSub }}人订阅
+          </div>
           <van-button
             class="mid-btn"
             size="small"
@@ -35,7 +39,26 @@
       left-arrow
       @click-left="onClickLeft"
     />
-
+    <!-- 新闻列表 -->
+    <van-list
+      v-model="loading"
+      :finished="finished"
+      finished-text="没有更多了"
+      @load="onLoad"
+    >
+      <van-cell
+        class="news-list"
+        v-for="(item, index) in plaNewList"
+        :key="item.news_id"
+      >
+        <div class="rank-num" slot="icon">
+          {{ index + 1 }}
+        </div>
+        <news-item :news="item" />
+      </van-cell>
+    </van-list>
+    <!-- /新闻列表 -->
+    <!-- 
     <van-cell
       class="news-list"
       v-for="(item, index) in plaNewList"
@@ -45,7 +68,8 @@
         {{ index + 1 }}
       </div>
       <news-item :news="item" />
-    </van-cell>
+    </van-cell> -->
+
     <!-- <v-cell></v-cell>
      -->
   </div>
@@ -54,6 +78,7 @@
 <script>
 import { getPlaNews } from "@/api/news";
 import { isSubscribePla, unsubscribePla, subscribePla } from "@/api/user";
+import { countPlaNews, countPlaSubscription } from "@/api/pla";
 import NewsItem from "@/components/news-item";
 
 export default {
@@ -73,15 +98,27 @@ export default {
       plaLogo: "",
       show: true,
       isSub: true,
-      jsonInfo: {}
+      jsonInfo: {},
+      countNews: "2645",
+      countSub: " 147574",
+      page: 1,
+      loading: false,
+      finished: false
     };
   },
-  computed: {
-    derList() {
-      return this.$store.state.orderList;
+  computed: {},
+  watch: {
+    //  监听数据变化
+    isSub: {
+      handler(val, oldVal) {
+        if (this.isSub == false) {
+          this.countSub++;
+        } else {
+          this.countSub--;
+        }
+      }
     }
   },
-  watch: {},
   created() {
     // 获取平台新闻列表
     this.loadPlaItem();
@@ -94,15 +131,42 @@ export default {
     async loadPlaItem() {
       try {
         this.jsonInfo = JSON.parse(this.plaInfo);
-        const { data } = await getPlaNews({ pla_id: this.jsonInfo.id });
-        const results = data.data;
-        this.plaNewList.push(...results);
-        console.log(this.plaNewList[0]);
-        this.plaLogo = this.plaNewList[0].news_logo;
+        // console.log(this.jsonInfo);
       } catch (e) {
         console.log(e);
       }
+      // 获取平台基本信息
+      this.lodCount();
     },
+    // 获取平台基本信息
+    async lodCount() {
+      // console.log(this.jsonInfo.id);
+      const data1 = await countPlaNews({ pla_name: this.jsonInfo.name });
+      this.countNews = data1.data.data;
+      const data2 = await countPlaSubscription({ pla_id: this.jsonInfo.id });
+      this.countSub = data2.data.data;
+    },
+    async onLoad() {
+      const { data } = await getPlaNews({
+        pla_id: this.jsonInfo.id,
+        pageNum: this.page
+      });
+      // this.page++;
+      const results = data.data;
+      this.plaNewList.unshift(...results);
+      // console.log(this.plaNewList[0]);
+      this.plaLogo = this.plaNewList[0].news_logo;
+      this.loading = false;
+      // console.log(this.plaNewList.length);
+      if (results.length && this.plaNewList.length < 100) {
+        // 更新获取下一页数据的页码
+        this.page++;
+      } else {
+        // 没有数据了，把加载状态设置结束，不再触发加载更多
+        this.finished = true;
+      }
+    },
+
     // 订阅 subscribePla
     async userSub() {
       try {
@@ -126,7 +190,7 @@ export default {
       try {
         const { data } = await isSubscribePla({ pla_id: this.jsonInfo.id });
         const subDetail = data.detail;
-        console.log(subDetail);
+        // console.log(subDetail);
         if (subDetail == "未订阅") {
           this.isSub = true;
         } else {
@@ -170,25 +234,25 @@ export default {
     }
   }
   // 前三名 加粗
-  .news-list:nth-child(-n + 5) {
+  .news-list:nth-child(-n + 3) {
     .rank-num {
       font-weight: 600;
       font-size: 16px;
     }
   }
   // 第一名
-  .news-list:nth-child(3) {
+  .news-list:nth-child(1) {
     color: rgb(252, 80, 81, 0);
     .rank-num {
       font-size: 16px;
     }
   }
   // 第二名
-  .news-list:nth-child(4) {
+  .news-list:nth-child(2) {
     color: rgb(241, 130, 8, 0);
   }
   //第三名
-  .news-list:nth-child(5) {
+  .news-list:nth-child(3) {
     color: rgb(225, 171, 119, 0);
   }
   // image

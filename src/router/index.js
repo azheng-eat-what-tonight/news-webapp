@@ -11,16 +11,34 @@ const routes = [{
             import ('../views/login/')
     },
     {
+        path: '/search',
+        name: 'search',
+        component: () =>
+            import ('../views/search/')
+    }, {
         path: '/register',
         name: 'register',
         component: () =>
             import ('../views/register/')
     },
     {
-        path: '/userLike',
+        path: '/userLike/:uname',
         name: 'userLike',
         component: () =>
-            import ('../views/pickUserLike/')
+            import ('../views/pickUserLike/'),
+        props: true
+    },
+    {
+        path: '/cORfPassword',
+        name: 'cORfPassword',
+        component: () =>
+            import ('../views/cORfPassword/')
+    }, {
+        path: '/cORfPassword/:uname',
+        name: 'changePassword',
+        component: () =>
+            import ('@/views/cORfPassword/changePassword'),
+        props: true
     },
     {
         path: '/',
@@ -69,7 +87,13 @@ const routes = [{
         name: 'his',
         component: () =>
             import ('../views/my/his'),
-    }
+    },
+    {
+        path: '/my/updateInfo',
+        name: 'updateInfo',
+        component: () =>
+            import ('../views/my/updateInfo'),
+    },
 ]
 
 const router = new VueRouter({
